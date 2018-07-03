@@ -5,7 +5,10 @@ const Items = new Mongo.Collection('items');
 if(Meteor.isServer) {
 
   Meteor.publish('allItems', function() {
-    return Items.find();
+    return Items.find({}, {
+      limit: 1,
+      sort: { lastUpdated: 1 }
+    });
   });
 
   Meteor.methods({
@@ -24,17 +27,25 @@ if(Meteor.isServer) {
       });
     },
     voteOnItem(item, position) {
+      check(item, Object);
+      let lastUpdated = new Date();
         if(Meteor.userId()){
           if(position == 'itemOne') {
             Items.update(item._id, {
               $inc: {
                 'itemOne.value': 1
+              },
+              $set: {
+                lastUpdated
               }
-            });
+            })
           } else {
             Items.update(item._id, {
               $inc: {
                 'itemTwo.value': 1
+            },
+            $set: {
+              lastUpdated
             }
           });
         }

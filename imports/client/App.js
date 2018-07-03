@@ -49,6 +49,9 @@ export default createContainer(() => {
   let itemsSub = Meteor.subscribe('allItems');
   return {
     ready: itemsSub.ready(),
-    items: Items.find().fetch()
+    items: Items.find({}, {
+      limit: 1,
+      sort: { lastUpdated: 1 }
+    }).fetch()
   }
 }, App);
