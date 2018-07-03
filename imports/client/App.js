@@ -12,22 +12,19 @@ class App extends Component {
   const itemOne = this.refs.itemOne.value.trim();
   const itemTwo = this.refs.itemTwo.value.trim();
   if(itemOne !== '' && itemTwo !== '') {
-      console.log(this.refs.itemOne.value);
-      Items.insert({
-        itemOne: {
-          text: this.refs.itemOne.value.trim(),
-          value: 0
-        },
-        itemTwo: {
-          text: this.refs.itemTwo.value.trim(),
-          value: 0
+      Meteor.call('insertNewItem', itemOne, itemTwo, (err, res) => {
+        if(!err) {
+          this.refs.itemOne.value = '';
+          this.refs.itemTwo.value = '';
         }
       });
-      e.currentTarget.reset();
     }
   }
   render() {
-    return(
+    if(!this.props.ready) {
+      return <div>Loading</div>
+    }
+    return (
       <Fragment>
         <header>
           <h1>Voting Application</h1>
@@ -49,7 +46,9 @@ class App extends Component {
 }
 
 export default createContainer(() => {
+  let itemsSub = Meteor.subscribe('allItems');
   return {
-    items: Items.find({}).fetch()
+    ready: itemsSub.ready(),
+    items: Items.find().fetch()
   }
 }, App);
